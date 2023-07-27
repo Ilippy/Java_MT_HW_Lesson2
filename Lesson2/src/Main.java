@@ -1,11 +1,8 @@
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        Queue<Toy> toyList = new PriorityQueue<>();
+        List<Toy> toyList = new ArrayList<>();
         createRandomToys(toyList);
         boolean runnable = true;
         Scanner scanner = new Scanner(System.in);
@@ -15,6 +12,7 @@ public class Main {
             System.out.println("1 - Добавить игрушек");
             System.out.println("2 - Изменить вес игрушек");
             System.out.println("3 - Вытянуть игрушку из автомата");
+            System.out.println("4 - Прочитать данные из файла");
             System.out.println("0 - Выход");
             int customerChoiceInt = scanner.nextInt();
             switch (customerChoiceInt) {
@@ -25,13 +23,21 @@ public class Main {
                         System.out.println(getToy(toyList));
                     } else System.out.println("Автомат пуст");
                 }
+                case 4 -> showDataFromJson();
                 case 0 -> runnable = false;
                 default -> System.out.println("Введите корректную цифру");
             }
         }
     }
 
-    private static void editWeightToy(Queue<Toy> toyList, Scanner scanner) {
+    private static void showDataFromJson() {
+        List<Toy> toyList = ManageFile.readFile();
+        if (toyList != null){
+            showToysList(toyList);
+        } else System.out.println("Файл пуст или не найден");
+    }
+
+    private static void editWeightToy(List<Toy> toyList, Scanner scanner) {
         System.out.println("Введите ID игрушки");
         int toyId = scanner.nextInt();
         if (toyId >= 0 && toyId < toyList.size()) {
@@ -48,7 +54,7 @@ public class Main {
         }
     }
 
-    private static void addToy(Queue<Toy> toyList, Scanner scanner) {
+    private static void addToy(List<Toy> toyList, Scanner scanner) {
         System.out.println("Введите имя игрушки");
         String toyName = scanner.next();
         System.out.println("Введите количство");
@@ -59,16 +65,17 @@ public class Main {
     }
 
 
-    private static Toy getToy(Queue<Toy> toyList) {
+    private static Toy getToy(List<Toy> toyList) {
         Toy toy = Toy.get(toyList);
         if (toy == null) throw new NullPointerException("Ошибка!");
+        ManageFile.saveToJson(toy);
         if (toy.getQuantity() == 0) {
             toyList.remove(toy);
         }
         return toy;
     }
 
-    private static void showToysList(Queue<Toy> toyList) {
+    private static void showToysList(List<Toy> toyList) {
         System.out.println("------------------------------");
         if (toyList.size() > 0) {
             for (Toy toy : toyList) {
@@ -78,7 +85,7 @@ public class Main {
         System.out.println("------------------------------");
     }
 
-    private static void createRandomToys(Queue<Toy> toyList) {
+    private static void createRandomToys(List<Toy> toyList) {
         String[] typesOfToys = {"Конструктор", "Кукла", "Робот"};
         Random rn = new Random();
         for (String toyName : typesOfToys) {
